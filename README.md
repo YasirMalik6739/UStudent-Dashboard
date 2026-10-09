@@ -1,71 +1,292 @@
-# UStudent — Student Academic Portal Demo
+# 🎓 Smart Campus Management System
 
-A responsive student-facing frontend prototype inspired by the supplied UStudent dashboard reference. The project uses React, Vite, TypeScript, Tailwind CSS, React Router, Recharts, Lucide React, React Hook Form, Zod, date-fns, and Sonner.
+A modern, full-stack web application designed to simplify academic information management for college students. The Smart Campus Management System provides a centralized dashboard where students can view their attendance, subject-wise marks, semester-wise SGPA/CGPA, and class timetables.
 
-## Features
+The project combines a responsive React frontend with a Java Spring Boot REST API and a MySQL database.
 
-- Dashboard with academic summary cards, subject attendance analytics, attendance distribution, semester SGPA trend, upcoming events, and message previews.
-- Attendance summary, subject-level detail routes, date-wise session history, filters, CSV export, and threshold indicators.
-- Semester results for four completed demo semesters and one in-progress semester; published results include SGPA/CGPA examples, a configurable illustrative grading model, CSV export, and print action.
-- Interactive academic calendar with month/week/agenda views, category filters, event detail dialogs, and browser-local event creation.
-- Editable profile, sample payment history and printable demo receipt and sample receipt download, inbox/sent messages, mark-as-read state, local compose flow, Explore resources, account preferences, and Coming Soon routes.
-- Protected routes and browser-only demo authentication; global search; user dropdown; sample notifications; responsive mobile sidebar.
-- Centralized fictional demo data and domain services designed to be replaceable by API-backed implementations.
+## ✨ Features
 
-## Setup
+### 1. 📊 Student Dashboard
+- View a summary of academic performance.
+- Access important academic information from one place.
+- Navigate easily between academic modules.
 
-Requirements: Node.js 20+ and npm.
+### 2. 📅 Attendance Management
+- View subject-wise attendance records.
+- Track classes attended and total classes conducted.
+- Calculate attendance percentages.
+- Identify subjects where attendance needs improvement.
+
+### 3. 📝 Subject-wise Marks
+- View marks obtained in individual subjects.
+- Compare marks across different subjects.
+- Track academic performance throughout the semester.
+
+### 4. 🎯 SGPA / CGPA
+- View semester-wise SGPA.
+- View cumulative CGPA across semesters.
+- Display academic results using backend-calculated values.
+
+### 5. 🕒 Timetable Management
+- View the weekly class timetable.
+- Check subjects, class timings, and classrooms.
+- Organize the academic schedule in one place.
+
+## 🛠️ Technology Stack
+
+### Frontend
+- **React.js** — User interface
+- **Vite** — Development server and build tool
+- **Tailwind CSS** — Responsive styling
+- **React Router** — Page navigation
+- **Axios** — HTTP requests to the backend
+- **JavaScript** — Frontend logic
+
+### Backend
+- **Java 17 or later** — Programming language
+- **Spring Boot** — Backend application framework
+- **Spring Web** — REST API development
+- **Spring Data JPA** — Database operations
+- **Hibernate** — Object-relational mapping
+- **Maven** — Dependency and build management
+
+### Database
+- **MySQL** — Relational database
+
+## 🏗️ System Architecture
+
+The application follows a client-server architecture with a layered backend.
+
+```text
+Smart Campus Management System
+             |
+     React Frontend
+  (Vite + Tailwind CSS)
+             |
+       Axios / HTTP
+             |
+    Spring Boot REST API
+             |
+        Controller
+             |
+          Service
+             |
+        Repository
+             |
+        JPA / Hibernate
+             |
+          MySQL
+```
+
+### Project Structure
+
+```text
+smart-campus-management-system/
+│
+├── frontend/
+│   ├── public/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── services/
+│   │   ├── assets/
+│   │   ├── App.jsx
+│   │   └── main.jsx
+│   ├── package.json
+│   └── vite.config.js
+│
+├── backend/
+│   ├── src/
+│   │   └── main/
+│   │       ├── java/
+│   │       │   └── [application package]/
+│   │       │       ├── controller/
+│   │       │       ├── service/
+│   │       │       ├── repository/
+│   │       │       ├── entity/
+│   │       │       ├── dto/
+│   │       │       └── config/
+│   │       └── resources/
+│   │           └── application.properties
+│   └── pom.xml
+│
+└── README.md
+```
+
+*Note: The directory names above illustrate the intended organization. Adjust them to match the actual project files.*
+
+## ⚙️ Prerequisites
+
+Install the following before running the application:
+
+- Java JDK 17 or later
+- Node.js and npm
+- MySQL Server
+- Visual Studio Code or another suitable code editor
+- Git
+
+Verify your installations:
 
 ```bash
+java -version
+node -v
+npm -v
+git --version
+```
+
+## 🚀 Getting Started
+
+Follow these steps to run the project locally.
+
+### Step 1: Clone the Repository
+
+```bash
+git clone https://github.com/YOUR_USERNAME/smart-campus-management-system.git
+cd smart-campus-management-system
+```
+
+Replace `YOUR_USERNAME` with your GitHub username.
+
+### Step 2: Configure the MySQL Database
+
+Start MySQL and create the database:
+
+```sql
+CREATE DATABASE smart_campus;
+```
+
+Configure the database connection in the backend's `application.properties` file.
+
+Example configuration:
+
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/smart_campus
+spring.datasource.username=${DB_USERNAME:root}
+spring.datasource.password=${DB_PASSWORD}
+
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+
+server.port=8080
+```
+
+Set the `DB_PASSWORD` environment variable to your MySQL password before starting the backend. Adjust the configuration to match your existing application properties.
+
+**Security note:** Never commit real database passwords, API keys, or other credentials to GitHub.
+
+### Step 3: Run the Backend
+
+Open a terminal in the backend directory:
+
+```bash
+cd backend
+```
+
+Run the application using Maven:
+
+```bash
+mvn spring-boot:run
+```
+
+If the project includes the Maven Wrapper, you can use:
+
+Windows:
+
+```bash
+mvnw.cmd spring-boot:run
+```
+
+The backend should be available at:
+
+`http://localhost:8080`
+
+### Step 4: Run the Frontend
+
+Open a second terminal and navigate to the frontend directory:
+
+```bash
+cd frontend
 npm install
-cp .env.example .env
 npm run dev
 ```
 
-Open the URL printed by Vite (usually `http://localhost:5173`). On Windows PowerShell, copy the environment template with `Copy-Item .env.example .env` if needed.
+Vite will display the local development URL, typically:
 
-## Demo login
+`http://localhost:5173`
 
-- Student ID: `STU-2026-1042`
-- Password: `Student@123`
+Open that URL in your browser to access the application.
 
-Use **Use demo account** on the login page to populate the sample credentials. The authentication is only a local demo flag and is not suitable for production.
+### Step 5: Connect Frontend and Backend
 
-## Build and type checking
+Ensure that:
 
-```bash
-npm run typecheck
-npm run build
-npm run preview
-```
+- The Spring Boot backend is running on port `8080`.
+- The React frontend is running on port `5173`.
+- Axios uses the correct backend API base URL.
+- Spring Boot CORS configuration allows requests from the frontend origin.
+- The MySQL server is running and the database credentials are correct.
 
-## Architecture
+## 🔌 API Integration
 
-- `src/app/App.tsx` — central route configuration.
-- `src/components/layout/` — shared sidebar, topbar and application shell.
-- `src/components/ui/` — reusable buttons, cards, badges, modals, stat cards and empty states.
-- `src/pages/` — main portal pages.
-- `src/data/demo/` — fictional student, subject, attendance, results, calendar, message, payment and notification datasets.
-- `src/services/index.ts` — domain service abstraction and demo adapter. Some demo-created changes are stored in local storage.
-- `src/services/apiClient.ts` — centralized typed JSON REST client with normalized errors and AbortSignal support.
-- `src/config/appConfig.ts` — common attendance threshold, grading reference, demo credentials and API configuration.
-- `src/features/auth/` — simulated auth context and protected route.
+The frontend communicates with the backend through REST APIs.
 
-## Backend integration plan
+The exact endpoints depend on the implementation. A typical API organization may include:
 
-1. Set `VITE_API_BASE_URL` in `.env` to the backend's API base URL.
-2. Replace domain functions in `src/services/index.ts` with API-backed implementations that retain their existing return contracts.
-3. Add API DTOs and server-side authentication/session handling; do not use the current demo login for production.
-4. Set `VITE_DATA_MODE=api` as your own provider-selection flag when you implement the API adapter. The current project deliberately stays in demo mode unless the services are changed.
+| Module | Example endpoint |
+|---|---|
+| Student information | `GET /api/students/{id}` |
+| Attendance | `GET /api/attendance/student/{studentId}` |
+| Subject-wise marks | `GET /api/marks/student/{studentId}` |
+| Semester results | `GET /api/results/student/{studentId}` |
+| Timetable | `GET /api/timetable/student/{studentId}` |
 
-`apiClient.ts` is a reusable foundation, but the current service methods do not make live API requests. No database or real university system is connected.
+These are illustrative endpoint examples. Use the actual routes implemented in the backend.
 
-## Demo data rules
+## 🎓 Academic Scope
 
-Every student identity, subject, attendance record, mark, transaction, message and calendar notice is fictional or illustrative. Holiday entries are not confirmed institutional closures. The illustrative grading bands are documented in `src/config/appConfig.ts` and result code. The sample current semester stays `In Progress`; grades are pending rather than invented.
+This project focuses exclusively on four core academic modules:
 
-## Notes
+- Attendance
+- Subject-wise marks
+- Semester-wise SGPA/CGPA
+- Timetable
 
-- User profile edits, newly created calendar events, message read state, compose items, preferences, and simulated login state are browser-local.
-- No real payment gateway, email delivery, official records, or production authentication is included.
-- `npm run build` performs TypeScript checks and creates a production bundle.
+The system intentionally excludes unrelated modules such as fees, library management, hostel management, assignments, complaints, notices, and campus events.
+
+## 🔒 Security and Data Handling
+
+- Store database credentials outside version-controlled source files.
+- Validate incoming data in the backend.
+- Handle API errors appropriately.
+- Configure CORS for the intended frontend origin.
+- Keep academic calculations and authoritative results in the backend.
+
+This project is intended as an academic application. Authentication, authorization, and production security should be implemented and tested before using it with real student records.
+
+## 🔮 Future Improvements
+
+Possible improvements within the existing academic scope include:
+
+- Role-based access for students and authorized academic staff.
+- Improved attendance and academic performance visualizations.
+- Exportable academic reports.
+- Enhanced mobile responsiveness.
+- Automated testing and deployment.
+
+## 👨‍💻 Author
+
+**Yasir Malik**
+
+B.Tech — Computer Science Engineering (AI/ML)
+
+## 🎯 Project Purpose
+
+Developed as a full-stack academic project to demonstrate frontend development, REST API integration, Java backend development, relational database management, and software architecture.
+
+## 📄 License
+
+This project is available for educational and learning purposes. Add a `LICENSE` file if you want to specify the terms under which others may use, modify, or distribute the code.
+
+---
+
+⭐ If you find this project useful, consider giving the repository a star!
