@@ -1,0 +1,13 @@
+import { ArrowUpRight, BookOpen, BriefcaseBusiness, Code2, Compass, GraduationCap, Lightbulb, Users } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { PageHeader } from '../components/ui/PageHeader';
+import { Badge } from '../components/ui/Badge';
+const resources = [
+  { title: 'Learning Resources', description: 'Organize study topics and explore the academic subjects already available in your portal.', icon: BookOpen, tint: '#f1edff', color: '#6842d9', label: 'Available', path: '/attendance' },
+  { title: 'Programming Practice', description: 'Build a regular practice routine around algorithms, databases and core programming concepts.', icon: Code2, tint: '#eaf4ff', color: '#3989dd', label: 'Available', path: '/results' },
+  { title: 'Technical Events', description: 'Keep track of the sample department seminar and project checkpoints in your calendar.', icon: Lightbulb, tint: '#fff0ec', color: '#e8755e', label: 'Calendar', path: '/calendar' },
+  { title: 'Career Development', description: 'A future home for resume resources, interview preparation and career guidance materials.', icon: BriefcaseBusiness, tint: '#e8faf2', color: '#21a977', label: 'Coming soon', path: '/coming-soon/career' },
+  { title: 'Student Clubs', description: 'Discover how student clubs and peer communities could be presented in the portal.', icon: Users, tint: '#fff5df', color: '#bd841e', label: 'Coming soon', path: '/coming-soon/clubs' },
+  { title: 'Internship Preparation', description: 'A future collection of internship checklists, practice plans and application resources.', icon: GraduationCap, tint: '#f8eefa', color: '#a04bbb', label: 'Coming soon', path: '/coming-soon/internships' },
+];
+export function ExplorePage() { return <><PageHeader title="Explore" subtitle="A curated starting point for academic growth and campus resources." /><div className="callout-note mb-4"><Compass size={16} /><span>Resources here are general demo suggestions. The prototype does not represent a confirmed institutional partnership or a live external program.</span></div><div className="explore-grid">{resources.map(r => { const Icon = r.icon; return <article key={r.title} className="explore-card"><div className="explore-icon" style={{ background: r.tint, color: r.color }}><Icon size={21} /></div><h3>{r.title}</h3><p>{r.description}</p><div className="explore-card-foot"><Badge tone={r.label === 'Available' || r.label === 'Calendar' ? 'green' : 'gray'}>{r.label}</Badge><Link to={r.path} className="small-link" aria-label={`Open ${r.title}`}>{r.label === 'Coming soon' ? 'Preview' : 'Explore'} <ArrowUpRight size={14} /></Link></div></article>; })}</div></>; }

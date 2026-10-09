@@ -1,0 +1,46 @@
+import { useState } from 'react';
+import { ArrowDownToLine, Printer, GraduationCap, Medal, BookOpenCheck, BadgeCheck } from 'lucide-react';
+import { Bar, BarChart, CartesianGrid, Cell, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { resultsService } from '../services';
+import { Card, CardTitle } from '../components/ui/Card';
+import { StatCard } from '../components/ui/StatCard';
+import { PageHeader } from '../components/ui/PageHeader';
+import { Badge, statusTone } from '../components/ui/Badge';
+import { Button } from '../components/ui/Button';
+import { toast } from 'sonner';
+import { format, parseISO } from 'date-fns';
+
+export function ResultsPage() {
+  const semesters = resultsService.getSemesters();
+  const [semesterId, setSemesterId] = useState('sem-5');
+  const selected = resultsService.getBySemester(semesterId) ?? semesters[semesters.length - 1];
+  const completeSemesters = semesters.filter(s => s.status === 'Completed');
+  const cgpa = resultsService.getCgpa();
+  const exportCsv = () => {
+    const rows = [['Subject Code', 'Subject Name', 'Credits', 'Internal', 'External', 'Total', 'Grade', 'Grade Points', 'Result Status'], ...selected.subjects.map(result => {
+      const info = resultsService.getSubjectInfo(result.subjectId);
+      return [info?.code ?? result.subjectId, info?.name ?? 'Subject', info?.credits ?? '', result.internal ?? 'Pending', result.external ?? 'Pending', result.total ?? 'Pending', result.grade ?? '—', result.gradePoint ?? '—', result.status];
+    })];
+    const csv = rows.map(row => row.map(v => `"${String(v).replaceAll('"', '""')}"`).join(',')).join('\n');
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' })); const a = document.createElement('a'); a.href = url; a.download = `ustudent-semester-${selected.semester}-results-demo.csv`; a.click(); URL.revokeObjectURL(url); toast.success('Semester results exported.');
+  };
+  const chartData = completeSemesters.map(s => ({ semester: `Sem ${s.semester}`, sgpa: s.sgpa ?? 0 }));
+  const subjectMarks = selected.subjects.map(r => ({ name: resultsService.getSubjectInfo(r.subjectId)?.code ?? r.subjectId, fullName: resultsService.getSubjectInfo(r.subjectId)?.name ?? r.subjectId, internal: r.internal ?? 0, external: r.external ?? 0, total: r.total ?? 0 }));
+  const earned = selected.earnedCredits;
+  const totalSelectedCredits = selected.subjects.reduce((sum, r) => sum + (resultsService.getSubjectInfo(r.subjectId)?.credits ?? 0), 0);
+  const isPublished = selected.status === 'Completed';
+  return <>
+    <PageHeader title="Academic Results" subtitle="Review your semester performance and academic progress." actions={<><Button variant="outline" icon={<Printer size={15} />} onClick={() => window.print()}>Print results</Button><Button icon={<ArrowDownToLine size={15} />} onClick={exportCsv}>Download CSV</Button></>} />
+    <div className="callout-note mb-4"><Badge tone="purple">DEMO RECORDS</Badge><span>These semester results and marks are fictional illustrative records, not official academic results. The example grading model is configurable in <code>src/config/appConfig.ts</code>.</span></div>
+    <div className="stat-grid"><StatCard label="Latest published SGPA" value={completeSemesters.at(-1)?.sgpa?.toFixed(2) ?? '—'} hint="Semester 4 · published demo result" icon={<GraduationCap size={19} />} accent="purple" /><StatCard label="Overall CGPA" value={cgpa.toFixed(2)} hint="Credit-weighted across completed semesters" icon={<Medal size={19} />} accent="coral" /><StatCard label="Completed semesters" value={completeSemesters.length} hint="Current semester is still in progress" icon={<BookOpenCheck size={19} />} accent="blue" /><StatCard label="Earned credits" value={resultsService.getCompletedCredits()} hint="Credits from published semesters" icon={<BadgeCheck size={19} />} accent="green" /></div>
+    <div className="toolbar-row mt-3"><div className="toolbar-left"><label className="flex items-center gap-2 text-xs text-slate-500">Select semester <select className="filter-select" value={semesterId} onChange={e => setSemesterId(e.target.value)}>{semesters.map(s => <option value={s.id} key={s.id}>Semester {s.semester} {s.status === 'In Progress' ? '· In progress' : ''}</option>)}</select></label><Badge tone={statusTone(selected.status)} dot>{selected.status}</Badge></div><div className="toolbar-right"><span className="inline-note">Academic year {selected.academicYear}</span></div></div>
+    <div className="two-column"><Card><CardTitle title="Semester performance" subtitle="SGPA by completed semester · illustrative grading" /><div className="chart-container compact"><ResponsiveContainer width="100%" height="100%"><LineChart data={chartData} margin={{ top: 15, right: 14, left: -17, bottom: 5 }}><CartesianGrid strokeDasharray="3 4" vertical={false} stroke="#edf0f6" /><XAxis dataKey="semester" tick={{ fontSize: 10, fill: '#8f97a9' }} axisLine={false} tickLine={false} /><YAxis domain={[0, 10]} ticks={[0, 2, 4, 6, 8, 10]} tick={{ fontSize: 10, fill: '#8f97a9' }} axisLine={false} tickLine={false} /><Tooltip formatter={v => [`${Number(v).toFixed(2)}`, 'SGPA']} contentStyle={{ borderRadius: 9, border: '1px solid #eeeaf9', fontSize: 11 }} /><Line dataKey="sgpa" type="monotone" stroke="#6842d9" strokeWidth={2.5} dot={{ r: 4, fill: '#6842d9', stroke: '#fff', strokeWidth: 2 }} /></LineChart></ResponsiveContainer></div></Card>
+      <Card><CardTitle title={isPublished ? 'Subject marks' : 'Current semester subjects'} subtitle={isPublished ? `Semester ${selected.semester} internal + external marks` : 'Grades remain pending until the semester is completed'} />{isPublished ? <div className="chart-container compact"><ResponsiveContainer width="100%" height="100%"><BarChart data={subjectMarks} margin={{ top: 10, right: 8, left: -17, bottom: 5 }}><CartesianGrid strokeDasharray="3 4" vertical={false} stroke="#edf0f6" /><XAxis dataKey="name" tick={{ fontSize: 9, fill: '#8f97a9' }} axisLine={false} tickLine={false} /><YAxis domain={[0, 100]} tick={{ fontSize: 9, fill: '#8f97a9' }} axisLine={false} tickLine={false} /><Tooltip formatter={(v, name) => [`${v} marks`, name === 'internal' ? 'Internal' : name === 'external' ? 'External' : 'Total']} contentStyle={{ borderRadius: 9, border: '1px solid #eeeaf9', fontSize: 11 }} /><Bar dataKey="total" name="Total" fill="#9454f5" radius={[5, 5, 0, 0]}>{subjectMarks.map((r, i) => <Cell key={r.name} fill={['#6842d9', '#9454f5', '#f7836b', '#5397ef', '#25b981'][i % 5]} />)}</Bar></BarChart></ResponsiveContainer></div> : <div className="chart-container compact grid place-items-center"><div className="text-center"><div className="coming-soon-icon" style={{ width: 48, height: 48, borderRadius: 15, marginBottom: 10 }}><BookOpenCheck size={21} /></div><p className="text-xs font-semibold text-slate-700 mb-1">Marks not published</p><p className="inline-note max-w-xs">The Semester 5 assessment is in progress. No marks or grades are displayed until demo results are published.</p></div></div>}</Card>
+    </div>
+    <Card className="mt-card"><CardTitle title={`Semester ${selected.semester} result details`} subtitle={isPublished ? `Published on ${selected.publishedOn ? format(parseISO(selected.publishedOn), 'dd MMM yyyy') : '—'}` : 'Result publication is pending for the current semester'} right={<div className="flex gap-2"><Badge tone={isPublished ? 'green' : 'orange'} dot>{isPublished ? 'Published' : 'In progress'}</Badge></div>} />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5"><div className="rounded-xl bg-slate-50 p-3"><span className="muted text-[10px]">Academic year</span><strong className="block mt-2 text-sm">{selected.academicYear}</strong></div><div className="rounded-xl bg-slate-50 p-3"><span className="muted text-[10px]">SGPA</span><strong className="block mt-2 text-sm">{selected.sgpa?.toFixed(2) ?? 'Pending'}</strong></div><div className="rounded-xl bg-slate-50 p-3"><span className="muted text-[10px]">Credits earned</span><strong className="block mt-2 text-sm">{earned} / {totalSelectedCredits}</strong></div><div className="rounded-xl bg-slate-50 p-3"><span className="muted text-[10px]">Semester status</span><strong className="block mt-2 text-sm">{selected.status}</strong></div></div>
+      <div className="table-wrap"><table className="data-table"><thead><tr><th>Subject code</th><th>Subject name</th><th>Credits</th><th>Internal / 30</th><th>External / 70</th><th>Total / 100</th><th>Grade</th><th>Grade points</th><th>Result</th></tr></thead><tbody>{selected.subjects.map(r => { const info = resultsService.getSubjectInfo(r.subjectId); return <tr key={r.subjectId}><td className="primary-cell">{info?.code ?? r.subjectId}</td><td>{info?.name ?? 'Subject record'}</td><td>{info?.credits ?? '—'}</td><td>{r.internal ?? '—'}</td><td>{r.external ?? '—'}</td><td className="primary-cell">{r.total ?? 'Pending'}</td><td>{r.grade ?? '—'}</td><td>{r.gradePoint ?? '—'}</td><td><Badge tone={statusTone(r.status)} dot>{r.status}</Badge></td></tr>; })}</tbody></table></div>
+      <p className="inline-note mt-3">Illustrative grading model: O = 90+, A+ = 80–89, A = 70–79, B+ = 60–69, B = 50–59, C = 40–49, F = below 40. SGPA/CGPA use credit-weighted grade points for published results only.</p>
+    </Card>
+  </>;
+}
